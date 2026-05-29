@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Library</title>
+    <link href="/static/index.css" rel="stylesheet"/>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">📝</div>
+                <span>Prompt Library</span>
+            </div>
+            <div class="header-actions">
+                <div class="search-bar">
+                    <input type="text" id="globalSearch" placeholder="Search prompts, tags, sections…" aria-label="Search">
+                    <span class="search-icon">🔍</span>
+                </div>
+                <button class="icon-btn" id="themeToggle" aria-label="Toggle theme" title="Toggle theme">🌓</button>
+                <button class="icon-btn" id="exportData" aria-label="Export data" title="Export data">💾</button>
+                <button class="icon-btn" id="importData" aria-label="Import data" title="Import data">📥</button>
+                <button class="icon-btn" id="settingsBtn" aria-label="Settings" title="Settings">⚙️</button>
+            </div>
+        </header>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <span>Quick Access</span>
+                </div>
+                <div class="section-item">
+                    <button class="section-toggle active" data-view="all">
+                        <span class="section-icon">📚</span>
+                        <span>All Prompts</span>
+                    </button>
+                </div>
+                <div class="section-item">
+                    <button class="section-toggle" data-view="favorites">
+                        <span class="section-icon">⭐</span>
+                        <span>Favorites</span>
+                    </button>
+                </div>
+                <div class="section-item">
+                    <button class="section-toggle" data-view="recent">
+                        <span class="section-icon">🕐</span>
+                        <span>Recent</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <span>Sections</span>
+                    <button class="icon-btn" id="addSection" title="Add section">➕</button>
+                </div>
+                <div id="sectionsList"></div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <div class="content-header">
+                <div class="content-title">
+                    <h2 id="pageTitle">All Prompts</h2>
+                    <div class="breadcrumb" id="breadcrumb">Home / All Prompts</div>
+                </div>
+                <button class="btn-add" id="addPrompt">
+                    ➕ New Prompt
+                </button>
+            </div>
+
+            <div class="stats-bar" id="statsBar">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalPrompts">0</div>
+                    <div class="stat-label">Total Prompts</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalSections">0</div>
+                    <div class="stat-label">Sections</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalFavorites">0</div>
+                    <div class="stat-label">Favorites</div>
+                </div>
+            </div>
+
+            <div class="filter-bar" id="filterBar"></div>
+
+            <div class="prompts-grid" id="promptsGrid"></div>
+        </main>
+    </div>
+
+    <!-- FAB Menu -->
+    <div class="fab-container">
+        <div class="fab-menu" id="fabMenu">
+            <div class="fab-item" id="fabAddPrompt">
+                <span>➕</span>
+                <span>New Prompt</span>
+            </div>
+            <div class="fab-item" id="fabAddSection">
+                <span>📁</span>
+                <span>New Section</span>
+            </div>
+        </div>
+        <button class="fab" id="fabToggle" aria-label="Quick actions">✨</button>
+    </div>
+
+    <!-- Add/Edit Prompt Modal -->
+    <div class="modal" id="promptModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="promptModalTitle">Add New Prompt</h3>
+                <button class="icon-btn" id="closePromptModal">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="promptForm">
+                    <div class="form-group">
+                        <label for="promptTitle">Title *</label>
+                        <input type="text" id="promptTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="promptDescription">Short Description</label>
+                        <input type="text" id="promptDescription" placeholder="Brief description of what this prompt does">
+                    </div>
+                    <div class="form-group">
+                        <label for="promptSection">Section *</label>
+                        <select id="promptSection" required>
+                            <option value="">Select a section</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="promptSubsection">Subsection</label>
+                        <select id="promptSubsection">
+                            <option value="">Select a subsection</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="promptContent">Prompt Content *</label>
+                        <textarea id="promptContent" required placeholder="Enter your prompt here. Use {{placeholder}} for dynamic values."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="promptTags">Tags (comma-separated)</label>
+                        <input type="text" id="promptTags" placeholder="e.g., coding, react, api">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelPrompt">Cancel</button>
+                <button class="btn btn-primary" id="savePrompt">Save Prompt</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View/Use Prompt Modal -->
+    <div class="modal" id="viewPromptModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="viewPromptTitle">Prompt Details</h3>
+                <button class="icon-btn" id="closeViewModal">✕</button>
+            </div>
+            <div class="modal-body" id="viewPromptBody"></div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="deletePromptBtn">Delete</button>
+                <button class="btn btn-secondary" id="duplicatePromptBtn">Duplicate</button>
+                <button class="btn btn-secondary" id="editPromptBtn">Edit</button>
+                <button class="btn btn-primary" id="copyPromptBtn">Copy to Clipboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Section Modal -->
+    <div class="modal" id="sectionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New Section</h3>
+                <button class="icon-btn" id="closeSectionModal">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="sectionForm">
+                    <div class="form-group">
+                        <label for="sectionName">Section Name *</label>
+                        <input type="text" id="sectionName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sectionIcon">Icon (emoji)</label>
+                        <input type="text" id="sectionIcon" placeholder="📁" maxlength="2">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancelSection">Cancel</button>
+                <button class="btn btn-primary" id="saveSection">Save Section</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Settings</h3>
+                <button class="icon-btn" id="closeSettingsModal">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Theme</label>
+                    <select id="themeSelect" class="settings-select">
+                        <option value="dark">Dark Mode</option>
+                        <option value="light">Light Mode</option>
+                        <option value="auto">Auto (System)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Default View</label>
+                    <select id="defaultViewSelect" class="settings-select">
+                        <option value="all">All Prompts</option>
+                        <option value="favorites">Favorites</option>
+                        <option value="recent">Recent</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Font Size</label>
+                    <select id="fontSizeSelect" class="settings-select">
+                        <option value="small">Small</option>
+                        <option value="medium">Medium</option>
+                        <option value="large">Large</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="confirmDeleteCheck" style="width: auto; margin-right: 8px;">
+                        Confirm before deleting
+                    </label>
+                </div>
+                <hr style="border: none; border-top: 1px solid var(--border); margin: 24px 0;">
+                <div class="form-group">
+                    <label style="color: var(--danger); font-weight: 600;">Danger Zone</label>
+                    <button class="btn btn-danger" id="clearAllDataBtn" style="width: 100%; margin-top: 8px;">
+                        🗑️ Clear All Data
+                    </button>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">
+                        This will permanently delete all prompts, sections, and subsections. This action cannot be undone.
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="resetSettingsBtn">Reset to Defaults</button>
+                <button class="btn btn-primary" id="saveSettingsBtn">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="importFile" accept=".json" style="display: none;">
+
+    <script src="/static/main.js"></script>
+</body>
+</html>
